@@ -18,14 +18,14 @@ public class SQLConnect {
 	
 //	2. Initialize Objects
 	public ResultSet rs; // menampung data hasil query select
-	public ResultSetMetaData rsm; // menampung meta data dari hasil query
+	public ResultSetMetaData rsm; // menampung metadata dari hasil query
 	private Connection con; 
 	private Statement st; // menampung statement utk execute query SQL (select, insert, update) 
 	
 //	3. Constructor
 	private SQLConnect() {
 //		set driver MySQL ke dalam memory 
-//		driver -> jembatan antara program kt dengan db nya 
+//		driver -> jembatan antara program dengan db nya 
 		try {
 			Class.forName("com.mysql.cj.jdbc.Driver");
 			con = DriverManager.getConnection(CONNECTION, USERNAME, PASSWORD); 
