@@ -29,9 +29,9 @@ public class Vendor extends User{
 		List<Vendor> vendors = new ArrayList<>();
 		String query = "SELECT * FROM vendors";
 
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 
-			try (ResultSet rs = stmt.executeQuery()) {
+			try (ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
 					Vendor vendor = new Vendor();
 					vendor.setId(rs.getString("user_id"));
@@ -56,13 +56,13 @@ public class Vendor extends User{
 		}
 
 		String query = "INSERT INTO invitations (event_id, user_id, invitation_status, invitation_role) VALUES(?, ?, ?, ?)";
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-			stmt.setString(1, eventId);
-			stmt.setString(2, userId);
-			stmt.setString(3, "pending");
-			stmt.setString(4, "Vendor");
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, eventId);
+			statement.setString(2, userId);
+			statement.setString(3, "pending");
+			statement.setString(4, "Vendor");
 
-			int rowsAffected = stmt.executeUpdate();
+			int rowsAffected = statement.executeUpdate();
 			if (rowsAffected > 0) {
 				return "Vendor invitation sent successfully!";
 			} else {
@@ -76,11 +76,11 @@ public class Vendor extends User{
 
 	public static String updateVendor(String description, String product) {
 		String query = "UPDATE vendors SET product_name = ?, product_description = ?";
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-			stmt.setString(1, product);
-			stmt.setString(2, description);
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, product);
+			statement.setString(2, description);
 
-			int rowsAffected = stmt.executeUpdate();
+			int rowsAffected = statement.executeUpdate();
 			if (rowsAffected > 0) {
 				return "Product successfully updated";
 			} else {

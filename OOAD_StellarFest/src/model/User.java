@@ -63,14 +63,14 @@ public class User {
 		this.user_role = user_role;
 	}
 	
-	public static String generateID() {
+	public static String generateId() {
         String prefix = "US";
         int nextNum = 1; 
 
         String query = "SELECT COUNT(*) AS user_count FROM users";
 
-        try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-            ResultSet rs = stmt.executeQuery();
+        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+            ResultSet rs = statement.executeQuery();
             if (rs.next()) {
                 nextNum = rs.getInt("user_count") + 1; 
             }
@@ -85,10 +85,10 @@ public class User {
 		String query = "SELECT * FROM users WHERE user_id = ?";
 		User user = null;
 
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-			stmt.setString(1, user_id);
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, user_id);
 
-			try (ResultSet rs = stmt.executeQuery()) {
+			try (ResultSet rs = statement.executeQuery()) {
 				if (rs.next()) {
 					user = new User();
 					user.setId(rs.getString("user_id"));
@@ -109,10 +109,10 @@ public class User {
     
     public static String deleteEvent(String eventId) {
     	String query = "DELETE FROM events WHERE event_id = ?";
-    	try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-	        stmt.setString(1, eventId);         
+    	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, eventId);         
 	        
-	        int rowsAffected = stmt.executeUpdate();
+	        int rowsAffected = statement.executeUpdate();
 	        if (rowsAffected > 0) {
 	            return "Event successfully deleted";
 	        } else {
@@ -129,8 +129,8 @@ public class User {
     	List<User> users = new ArrayList<>();
     	User user = null;
     	
-    	try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
- 	        try (ResultSet rs = stmt.executeQuery()) {
+    	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+ 	        try (ResultSet rs = statement.executeQuery()) {
  	            while(rs.next()) {
  	            	user = new User();
 	                user.setId(rs.getString("user_id"));
@@ -150,10 +150,10 @@ public class User {
     
     public static String deleteUser(String user_id) {
     	String query = "DELETE FROM events WHERE user_id = ?";
-    	try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-	        stmt.setString(1, user_id);         
+    	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, user_id);         
 	        
-	        int rowsAffected = stmt.executeUpdate();
+	        int rowsAffected = statement.executeUpdate();
 	        if (rowsAffected > 0) {
 	            return "User successfully deleted";
 	        } else {
@@ -171,9 +171,9 @@ public class User {
         String query = "SELECT * FROM users";
         List<User> users = new ArrayList<>();
         
-        try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
+        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 
-	        try (ResultSet rs = stmt.executeQuery()) {
+	        try (ResultSet rs = statement.executeQuery()) {
 	            while (rs.next()) {
 	            	User user = new User();
 	            	user.setId(rs.getString("user_id"));
@@ -198,11 +198,11 @@ public class User {
 		String query = "SELECT * FROM users WHERE user_email = ? AND user_password = ?";
 		User user = null;
 		
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-	        stmt.setString(1, name);
-	        stmt.setString(2, password);
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, name);
+	        statement.setString(2, password);
 
-	        try (ResultSet rs = stmt.executeQuery()) {
+	        try (ResultSet rs = statement.executeQuery()) {
 	            if (rs.next()) {
 	                user = new User();
 	                user.setId(rs.getString("user_id"));
@@ -235,13 +235,13 @@ public class User {
 	    }
 
 	    String query = "UPDATE user SET user_name = ?, user_email = ?, user_password = ? WHERE user_name = ?";
-	    try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-	        stmt.setString(1, name);         
-	        stmt.setString(2, email);         
-	        stmt.setString(3, newPassword);  
-	        stmt.setString(4, user.getName()); 
+	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, name);         
+	        statement.setString(2, email);         
+	        statement.setString(3, newPassword);  
+	        statement.setString(4, user.getName()); 
 
-	        int rowsAffected = stmt.executeUpdate();
+	        int rowsAffected = statement.executeUpdate();
 	        if (rowsAffected > 0) {
 	            return "Account successfully updated";
 	        } else {
@@ -258,10 +258,10 @@ public class User {
 	    String query = "SELECT * FROM users WHERE user_name = ?";
 	    User user = null;
 
-	    try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-	        stmt.setString(1, name);
+	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, name);
 
-	        try (ResultSet rs = stmt.executeQuery()) {
+	        try (ResultSet rs = statement.executeQuery()) {
 	            if (rs.next()) {
 	                user = new User();
 	                user.setId(rs.getString("user_id"));
@@ -282,10 +282,10 @@ public class User {
 		String query = "SELECT * FROM users WHERE user_email = ?";
 		User user = null;
 
-	    try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-	        stmt.setString(1, email);
+	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, email);
 
-	        try (ResultSet rs = stmt.executeQuery()) {
+	        try (ResultSet rs = statement.executeQuery()) {
 	            if (rs.next()) {
 	                user = new User();
 	                user.setId(rs.getString("user_id"));
@@ -350,16 +350,16 @@ public class User {
     }
 	
     public static void register(String name, String password, String email, String role) {
-    	String currID = generateID();
+    	String currID = generateId();
         String query = "INSERT INTO users (user_id, user_name, user_password, user_email, user_role) VALUES(?, ?, ?, ?, ?)";
-        try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-        	stmt.setString(1, currID);  
-            stmt.setString(2, name);     
-            stmt.setString(3, password);   
-            stmt.setString(4, email);      
-            stmt.setString(5, role);       
+        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+        	statement.setString(1, currID);  
+            statement.setString(2, name);     
+            statement.setString(3, password);   
+            statement.setString(4, email);      
+            statement.setString(5, role);       
 
-            int rowsAffected = stmt.executeUpdate();
+            int rowsAffected = statement.executeUpdate();
             if (rowsAffected > 0) {
                 System.out.println("User registered successfully!");
             } else {

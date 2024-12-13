@@ -20,45 +20,45 @@ public class Invitation {
 	public Invitation() {
 		super();
 	}
-	public String getInvitation_id() {
+	public String getInvitationId() {
 		return invitation_id;
 	}
-	public void setInvitation_id(String invitation_id) {
+	public void setInvitationId(String invitation_id) {
 		this.invitation_id = invitation_id;
 	}
-	public String getEvent_id() {
+	public String getEventId() {
 		return event_id;
 	}
-	public void setEvent_id(String event_id) {
+	public void setEventId(String event_id) {
 		this.event_id = event_id;
 	}
 	public String getUser_id() {
 		return user_id;
 	}
-	public void setUser_id(String user_id) {
+	public void setUserId(String user_id) {
 		this.user_id = user_id;
 	}
-	public String getInvitation_status() {
+	public String getInvitationStatus() {
 		return invitation_status;
 	}
-	public void setInvitation_status(String invitation_status) {
+	public void setInvitationStatus(String invitation_status) {
 		this.invitation_status = invitation_status;
 	}
-	public String getInvitation_role() {
+	public String getInvitationRole() {
 		return invitation_role;
 	}
-	public void setInvitation_role(String invitation_role) {
+	public void setInvitationRole(String invitation_role) {
 		this.invitation_role = invitation_role;
 	}
 	
-	public static String generateID() {
+	public static String generateId() {
 		String prefix = "IN";
 		int nextNum = 1;
 
 		String query = "SELECT COUNT(*) AS invitation_count FROM invitations";
 
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-			ResultSet rs = stmt.executeQuery();
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			ResultSet rs = statement.executeQuery();
 			if (rs.next()) {
 				nextNum = rs.getInt("invitation_count") + 1;
 			}
@@ -75,19 +75,19 @@ public class Invitation {
 
 		User u = User.getUserByEmail(email);
 
-		String invitation_id = Invitation.generateID();
+		String invitation_id = Invitation.generateId();
 		String user_id = u.getId();
 		String role = u.getRole();
 		String status = "pending";
 
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-			stmt.setString(1, invitation_id);
-			stmt.setString(2, eventID);
-			stmt.setString(3, user_id);
-			stmt.setString(4, role);
-			stmt.setString(5, status);
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, invitation_id);
+			statement.setString(2, eventID);
+			statement.setString(3, user_id);
+			statement.setString(4, role);
+			statement.setString(5, status);
 
-			int rowsInserted = stmt.executeUpdate();
+			int rowsInserted = statement.executeUpdate();
 
 			if (rowsInserted > 0) {
 				return "Invitation sent successfully to " + email;
@@ -105,11 +105,11 @@ public class Invitation {
 
 		String query = "UPDATE invitatons SET invitation_status = ? WHERE user_id = ? AND event_id = ?";
 
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-			stmt.setString(1, "accepted");
-			stmt.setString(2, userId);
-			stmt.setString(3, eventId);
-			int rowsAffected = stmt.executeUpdate();
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, "accepted");
+			statement.setString(2, userId);
+			statement.setString(3, eventId);
+			int rowsAffected = statement.executeUpdate();
 			if (rowsAffected > 0) {
 				return "Invitation accepted";
 			} else {
@@ -126,16 +126,16 @@ public class Invitation {
 		String query = "SELECT * FROM invitations WHERE user_id = ?";
 		List<Invitation> invitations = new ArrayList<>();
 
-		try (PreparedStatement stmt = dbConnect.preparedStatement(query)) {
-			stmt.setString(1, userId);
-			try (ResultSet rs = stmt.executeQuery()) {
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, userId);
+			try (ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
 					Invitation invitation = new Invitation();
-					invitation.setEvent_id(rs.getString("event_id"));
-					invitation.setInvitation_id(rs.getString("invitation_id"));
-					invitation.setInvitation_role(rs.getString("invitation_role"));
-					invitation.setInvitation_status(rs.getString("invitation_status"));
-					invitation.setUser_id(rs.getString("user_id"));
+					invitation.setEventId(rs.getString("event_id"));
+					invitation.setInvitationId(rs.getString("invitation_id"));
+					invitation.setInvitationRole(rs.getString("invitation_role"));
+					invitation.setInvitationStatus(rs.getString("invitation_status"));
+					invitation.setUserId(rs.getString("user_id"));
 					invitations.add(invitation);
 				}
 			}

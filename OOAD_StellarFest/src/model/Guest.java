@@ -17,11 +17,11 @@ public class Guest extends User {
 		super();
 	}
 
-	public String getAccepted_invitations() {
+	public String getAcceptedInvitations() {
 		return accepted_invitations;
 	}
 
-	public void setAccepted_invitations(String accepted_invitations) {
+	public void setAcceptedInvitations(String accepted_invitations) {
 		this.accepted_invitations = accepted_invitations;
 	}
 	
@@ -83,11 +83,11 @@ public class Guest extends User {
   	        try (ResultSet rs = stmt.executeQuery()) {
   	            while(rs.next()) {
   	                Invitation invitation = new Invitation();
-  	                invitation.setEvent_id(rs.getString("event_id"));
-  	                invitation.setInvitation_id(rs.getString("invitation_id"));
-  	                invitation.setInvitation_role(rs.getString("invitation_role"));
-  	                invitation.setInvitation_status(rs.getString("invitation_status"));
-  	                invitation.setUser_id(rs.getString("user_id"));
+  	                invitation.setEventId(rs.getString("event_id"));
+  	                invitation.setInvitationId(rs.getString("invitation_id"));
+  	                invitation.setInvitationRole(rs.getString("invitation_role"));
+  	                invitation.setInvitationStatus(rs.getString("invitation_status"));
+  	                invitation.setUserId(rs.getString("user_id"));
   	                invitations.add(invitation);
   	            }
   	        }
@@ -130,12 +130,12 @@ public class Guest extends User {
 	        try (ResultSet rs = stmt.executeQuery()) {
 	            if (rs.next()) {
 	            	event = new Event();
-                    event.setEvent_id(rs.getString("event_id"));
-                    event.setEvent_date(rs.getString("event_date"));
-                    event.setEvent_name(rs.getString("event_name"));
-                    event.setEvent_location(rs.getString("event_location"));
-                    event.setEvent_description(rs.getString("event_description"));
-                    event.setOrganizer_id("organizer_id");
+                    event.setEventId(rs.getString("event_id"));
+                    event.setEventDate(rs.getString("event_date"));
+                    event.setEventName(rs.getString("event_name"));
+                    event.setEventLocation(rs.getString("event_location"));
+                    event.setEventDescription(rs.getString("event_description"));
+                    event.setOrganizerId("organizer_id");
 	            }
 	        }
 	    } catch (SQLException e) {

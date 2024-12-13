@@ -7,11 +7,11 @@ public class EventOrganizer extends User {
 		super();
 	}
 
-	public String getEvents_created() {
+	public String getEventsCreated() {
 		return events_created;
 	}
 
-	public void setEvents_created(String events_created) {
+	public void setEventsCreated(String events_created) {
 		this.events_created = events_created;
 	}
 	
