@@ -65,7 +65,7 @@ public class Admin extends User{
 		return event;
     }
     
-    public void deleteEvent(String eventId) {
+    public String deleteEvent(String eventId) {
     	String query = "DELETE FROM event WHERE event_id = ?";
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 			statement.setString(1, eventId);
@@ -73,15 +73,18 @@ public class Admin extends User{
 			int rowsAffected = statement.executeUpdate();
 			if (rowsAffected > 0) {
 				System.out.println("Event successfully deleted.");
+				return "success";
 			} else {
 				System.out.println("Failed to delete event.");
+				return "failed";
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
+			return "failed";
 		}
     }
     
-    public void deleteUser(String user_id) {
+    public String deleteUser(String user_id) {
     	String query = "DELETE FROM event WHERE user_id = ?";
     	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 	        statement.setString(1, user_id);         
@@ -89,11 +92,14 @@ public class Admin extends User{
 	        int rowsAffected = statement.executeUpdate();
 	        if (rowsAffected > 0) {
 	            System.out.println("User successfully deleted.");
+	            return "success";
 	        } else {
 	            System.out.println("Failed to delete user.");
+	            return "failed";
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
+	        return "failed";
 	    }
     }
     

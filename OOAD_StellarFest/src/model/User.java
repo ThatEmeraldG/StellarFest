@@ -235,7 +235,6 @@ public class User {
 	    return user;
 	}
 
-	
 	public User getUserByEmail(String email) {
 		String query = "SELECT * FROM user WHERE user_email = ?";
 		User user = null;
@@ -296,7 +295,8 @@ public class User {
 	        return "Cannot update profile due to invalid inputs";
 	    }
 
-	    String query = "UPDATE user SET user_name = ?, user_email = ?, user_password = ? WHERE user_name = ?";
+	    String query = "UPDATE user SET user_name = ?, user_email = ?, user_password = ? "
+	    			 + "WHERE user_name = ?";
 	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 	        statement.setString(1, username);         
 	        statement.setString(2, email);         
@@ -316,7 +316,7 @@ public class User {
 	}
 	
 	public boolean checkChangeProfile(String username, String email, String oldPassword, String newPassword) {
-		if(email == "" || username == "" || newPassword == "") {
+		if(email.isEmpty() || username.isEmpty() || newPassword.isEmpty()) {
 			return false;
 		} else if(getUserByName(username)!=null) {
 			return false;
