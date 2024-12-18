@@ -1,9 +1,9 @@
 package main;
 
-import view.Register;
 import javafx.application.Application;
 import javafx.scene.Scene;
 import javafx.stage.Stage;
+import utils.PageManager;
 
 public class Main extends Application{
 	private static Stage stage;
@@ -20,9 +20,11 @@ public class Main extends Application{
 	}
 
 	@Override
-	public void start(Stage stage) throws Exception {
-		Register register = new Register();
-		stage.setScene(register.getScene());
+	public void start(Stage primaryStage) throws Exception {
+		stage = primaryStage;
+		PageManager.initialize(stage);
+		PageManager.getInstance().showLoginPage();
+		stage.setTitle("StellarFest");
 		stage.show();
 	}
 }

@@ -15,9 +15,17 @@ public class User {
 	private String user_password;
 	private String user_role;
 	
-	private static SQLConnect dbConnect = SQLConnect.getInstance();;
+	private static SQLConnect dbConnect = SQLConnect.getInstance();
 	
 	// Constructor
+	public User(String id, String email, String name, String password, String role) {
+		this.user_id = id;
+		this.user_email = email;
+		this.user_name = name;
+		this.user_password = password;
+		this.user_role = role;
+	}
+	
 	public User() {
 		super();
 	}
@@ -63,11 +71,17 @@ public class User {
 		this.user_role = user_role;
 	}
 	
-	public static String generateId() {
-        String prefix = "US";
-        int nextNum = 1; 
+	public void register(String email, String name, String password, String role) {
+		boolean inputTest = checkRegisterInput(email, name, password);
+		
+		if (inputTest == false) {
+			//error log here?
+			return;
+		}
+		
+		int nextNum = 0; 
 
-        String query = "SELECT COUNT(*) AS user_count FROM users";
+        String query = "SELECT COUNT(*) AS user_count FROM user";
 
         try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
             ResultSet rs = statement.executeQuery();
@@ -77,12 +91,108 @@ public class User {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+        
+		String currID = String.format("UID%03d", nextNum);
+		
+        query = "INSERT INTO user (user_id, user_email, user_name, user_password, user_role) "
+        		+ "VALUES(?, ?, ?, ?, ?)";
+        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+        	statement.setString(1, currID);
+            statement.setString(2, email);
+            statement.setString(3, name);
+            statement.setString(4, password);
+            statement.setString(5, role);
 
-        return String.format("%s%03d", prefix, nextNum);
+            int rowsAffected = statement.executeUpdate();
+            if (rowsAffected > 0) {
+                System.out.println("User registered successfully!");
+            } else {
+                System.out.println("Failed to register user.");
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+    }
+    
+    public boolean validateLogin(String name, String password) {
+    	if (name.isEmpty() || password.isEmpty()) {
+    		return false;
+    	}
+    	
+    	return true;
     }
 	
-	public static User getUserById(String user_id) {
-		String query = "SELECT * FROM users WHERE user_id = ?";
+    public User login(String email, String password) {
+		String query = "SELECT * FROM user WHERE user_email = ? AND user_password = ?";
+		User user = null;
+		
+		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, email);
+	        statement.setString(2, password);
+
+	        try (ResultSet rs = statement.executeQuery()) {
+	            if (rs.next()) {
+	            	user = new User(rs.getString("user_id"), 
+									rs.getString("user_email"),
+									rs.getString("user_name"),
+									rs.getString("user_password"),
+									rs.getString("user_role"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return user;
+	}
+	
+    public boolean checkRegisterInput(String email, String name, String password) {
+		if (email.isEmpty()) {
+			return false;
+		}
+		if (name.isEmpty()) {
+			return false;
+		}
+		if (password.length() <= 5) {
+			return false;
+		}
+		int count = 0;
+
+		String query = "SELECT COUNT(*) AS user_count FROM user WHERE user_email = ?";
+
+        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, email);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("user_count"); 
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+		if (count > 0) {
+			return false;
+		}
+
+		query = "SELECT COUNT(*) AS user_count FROM user WHERE user_name = ?";
+
+        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+			statement.setString(1, name);
+
+            ResultSet rs = statement.executeQuery();
+            if (rs.next()) {
+                count = rs.getInt("user_count"); 
+            }
+        } catch (SQLException e) {
+            e.printStackTrace();
+        }
+		if (count > 0) {
+			return false;
+		}
+		return true;
+	}
+	
+	public User getUserById(String user_id) {
+		String query = "SELECT * FROM user WHERE user_id = ?";
 		User user = null;
 
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
@@ -90,12 +200,11 @@ public class User {
 
 			try (ResultSet rs = statement.executeQuery()) {
 				if (rs.next()) {
-					user = new User();
-					user.setId(rs.getString("user_id"));
-					user.setName(rs.getString("user_name"));
-					user.setEmail(rs.getString("user_email"));
-					user.setRole(rs.getString("user_role"));
-					user.setPassword(rs.getString("user_password"));
+					user = new User(rs.getString("user_id"), 
+									rs.getString("user_email"),
+									rs.getString("user_name"),
+									rs.getString("user_password"),
+									rs.getString("user_role"));
 				}
 			}
 		} catch (SQLException e) {
@@ -104,40 +213,64 @@ public class User {
 		return user;
 	}
 	
-	
-	
-    
-    public static String deleteEvent(String eventId) {
-    	String query = "DELETE FROM events WHERE event_id = ?";
-    	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-	        statement.setString(1, eventId);         
-	        
-	        int rowsAffected = statement.executeUpdate();
-	        if (rowsAffected > 0) {
-	            return "Event successfully deleted";
-	        } else {
-	            return "Failed to delete event";
+	public User getUserByName(String username) {
+	    String query = "SELECT * FROM user WHERE user_name = ?";
+	    User user = null;
+
+	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, username);
+
+	        try (ResultSet rs = statement.executeQuery()) {
+	            if (rs.next()) {
+	                user = new User(rs.getString("user_id"), 
+									rs.getString("user_email"),
+									rs.getString("user_name"),
+									rs.getString("user_password"),
+									rs.getString("user_role"));
+	            }
 	        }
 	    } catch (SQLException e) {
 	        e.printStackTrace();
-	        return "Error occurred";
 	    }
-    }
-    
-    public static  List<User> viewAllUsers(){
-    	String query = "SELECT * FROM users";
+	    return user;
+	}
+
+	
+	public User getUserByEmail(String email) {
+		String query = "SELECT * FROM user WHERE user_email = ?";
+		User user = null;
+
+	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+	        statement.setString(1, email);
+
+	        try (ResultSet rs = statement.executeQuery()) {
+	            if (rs.next()) {
+	            	user = new User(rs.getString("user_id"), 
+									rs.getString("user_email"),
+									rs.getString("user_name"),
+									rs.getString("user_password"),
+									rs.getString("user_role"));
+	            }
+	        }
+	    } catch (SQLException e) {
+	        e.printStackTrace();
+	    }
+	    return user;
+	}
+	
+	public List<User> viewAlluser(){
+    	String query = "SELECT * FROM user";
     	List<User> users = new ArrayList<>();
     	User user = null;
     	
     	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
  	        try (ResultSet rs = statement.executeQuery()) {
  	            while(rs.next()) {
- 	            	user = new User();
-	                user.setId(rs.getString("user_id"));
-	                user.setName(rs.getString("user_name"));
-	                user.setEmail(rs.getString("user_email"));
-	                user.setRole(rs.getString("user_role"));
-	                user.setPassword(rs.getString("user_password"));
+ 	            	user = new User(rs.getString("user_id"), 
+ 	            					rs.getString("user_email"),
+ 	            					rs.getString("user_name"),
+ 	            					rs.getString("user_password"),
+ 	            					rs.getString("user_role"));
  	                users.add(user);
 
  	            }
@@ -148,79 +281,8 @@ public class User {
     	return users;
     }
     
-    public static String deleteUser(String user_id) {
-    	String query = "DELETE FROM events WHERE user_id = ?";
-    	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-	        statement.setString(1, user_id);         
-	        
-	        int rowsAffected = statement.executeUpdate();
-	        if (rowsAffected > 0) {
-	            return "User successfully deleted";
-	        } else {
-	            return "Failed to delete user";
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	        return "Error occurred";
-	    }
-    }
-    
-    
-    
-    public static List<User> getAllUser() {
-        String query = "SELECT * FROM users";
-        List<User> users = new ArrayList<>();
-        
-        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-
-	        try (ResultSet rs = statement.executeQuery()) {
-	            while (rs.next()) {
-	            	User user = new User();
-	            	user.setId(rs.getString("user_id"));
-	                user.setName(rs.getString("user_name"));
-	                user.setEmail(rs.getString("user_email"));
-	                user.setRole(rs.getString("user_role"));
-	                user.setPassword(rs.getString("user_password"));
-	                
-	                users.add(user);
-	            }
-	        }
-	        
-	       
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-        
-        return users;
-    }
-    
-    public static User login(String name, String password) {
-		String query = "SELECT * FROM users WHERE user_email = ? AND user_password = ?";
-		User user = null;
-		
-		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-	        statement.setString(1, name);
-	        statement.setString(2, password);
-
-	        try (ResultSet rs = statement.executeQuery()) {
-	            if (rs.next()) {
-	                user = new User();
-	                user.setId(rs.getString("user_id"));
-	                user.setName(rs.getString("user_name"));
-	                user.setEmail(rs.getString("user_email"));
-	                user.setRole(rs.getString("user_role"));
-	                user.setPassword(rs.getString("user_password"));
-	                
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return user;
-	}
-	
-	public static String updateProfile(String email, String name, String oldPassword, String newPassword) {
-	    User user = getUserByName(name);
+    public String updateProfile(String username, String email, String oldPassword, String newPassword) {
+	    User user = getUserByName(username);
 	    if (user == null) {
 	        return "User not found";
 	    }
@@ -229,14 +291,14 @@ public class User {
 	        return "Invalid old password";
 	    }
 
-	    boolean valid = checkChangeProfile(email, name, oldPassword, newPassword);
+	    boolean valid = checkChangeProfile(username, email, oldPassword, newPassword);
 	    if (!valid) {
 	        return "Cannot update profile due to invalid inputs";
 	    }
 
 	    String query = "UPDATE user SET user_name = ?, user_email = ?, user_password = ? WHERE user_name = ?";
 	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-	        statement.setString(1, name);         
+	        statement.setString(1, username);         
 	        statement.setString(2, email);         
 	        statement.setString(3, newPassword);  
 	        statement.setString(4, user.getName()); 
@@ -252,73 +314,11 @@ public class User {
 	        return "An error occurred while updating the profile";
 	    }
 	}
-
 	
-	public static User getUserByName(String name) {
-	    String query = "SELECT * FROM users WHERE user_name = ?";
-	    User user = null;
-
-	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-	        statement.setString(1, name);
-
-	        try (ResultSet rs = statement.executeQuery()) {
-	            if (rs.next()) {
-	                user = new User();
-	                user.setId(rs.getString("user_id"));
-	                user.setName(rs.getString("user_name"));
-	                user.setEmail(rs.getString("user_email"));
-	                user.setRole(rs.getString("user_role"));
-	                user.setPassword(rs.getString("user_password"));
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return user;
-	}
-
-	
-	public  static User getUserByEmail(String email) {
-		String query = "SELECT * FROM users WHERE user_email = ?";
-		User user = null;
-
-	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-	        statement.setString(1, email);
-
-	        try (ResultSet rs = statement.executeQuery()) {
-	            if (rs.next()) {
-	                user = new User();
-	                user.setId(rs.getString("user_id"));
-	                user.setName(rs.getString("user_name"));
-	                user.setEmail(rs.getString("user_email"));
-	                user.setRole(rs.getString("user_role"));
-	                user.setPassword(rs.getString("user_password"));
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return user;
-	}
-	
-	public static boolean checkRegisterInput(String email, String name, String password) {
-		if(email == "" || name == "" || password == "") {
+	public boolean checkChangeProfile(String username, String email, String oldPassword, String newPassword) {
+		if(email == "" || username == "" || newPassword == "") {
 			return false;
-		} else if(getUserByName(name)!=null) {
-			return false;
-		} else if(getUserByEmail(email)!=null) {
-			return false;
-		} else if(password.length() < 5) {
-			return false;
-		}
-			
-		return true;
-	}
-	
-	public static boolean checkChangeProfile(String email, String name, String oldPassword, String newPassword) {
-		if(email == "" || name == "" || newPassword == "") {
-			return false;
-		} else if(getUserByName(name)!=null) {
+		} else if(getUserByName(username)!=null) {
 			return false;
 		} else if(getUserByEmail(email)!=null) {
 			return false;
@@ -327,55 +327,5 @@ public class User {
 		}
 		return true;
 	}
-    
-    public static String validateRegister(String name, String password, String email, String role) {
-    	if (name.isEmpty() || password.isEmpty() || email.isEmpty() || role.isEmpty() ) {
-    		return "All field must be filled!";
-    	}
-    	
-    	if (password.length() < 5) {
-    		return "Password length must be at least 5 letters!";
-    	}
-    	
-    	if (getUserByEmail(email) != null) {
-    		return "Email must be unique!";
-    	}
-    	
-    	if (getUserByName(name) != null) {
-    		return "Username must be unique!";
-    	}
-    	
-    	// TODO: Implement Unique Validation
-    	return "";
-    }
-	
-    public static void register(String name, String password, String email, String role) {
-    	String currID = generateId();
-        String query = "INSERT INTO users (user_id, user_name, user_password, user_email, user_role) VALUES(?, ?, ?, ?, ?)";
-        try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-        	statement.setString(1, currID);  
-            statement.setString(2, name);     
-            statement.setString(3, password);   
-            statement.setString(4, email);      
-            statement.setString(5, role);       
-
-            int rowsAffected = statement.executeUpdate();
-            if (rowsAffected > 0) {
-                System.out.println("User registered successfully!");
-            } else {
-                System.out.println("Failed to register user.");
-            }
-        } catch (SQLException e) {
-            e.printStackTrace();
-        }
-    }
-    
-    public static boolean validateLogin(String name, String password) {
-    	if (name.isEmpty() || password.isEmpty()) {
-    		return false;
-    	}
-    	
-    	return true;
-    }
     
 }

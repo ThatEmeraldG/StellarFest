@@ -9,70 +9,76 @@ import java.util.List;
 import utils.SQLConnect;
 
 public class Event {
-	private String EventId;
-	private String EventName;
-	private String EventDate;
-	private String EventLocation;
-	private String EventDescription;
-	private String OrganizerId;
+	private String event_id;
+	private String event_name;
+	private String event_date;
+	private String event_location;
+	private String event_description;
+	private String organizer_id;
 	
 	private static SQLConnect dbConnect = SQLConnect.getInstance(); 
 	
-	public Event() {
-		super();
+	public Event(String event_id, String event_name, String event_date, String event_location, String event_description,
+			String organizer_id) {
+		this.event_id = event_id;
+		this.event_name = event_name;
+		this.event_date = event_date;
+		this.event_location = event_location;
+		this.event_description = event_description;
+		this.organizer_id = organizer_id;
 	}
 
 	public String getEventId() {
-		return EventId;
+		return event_id;
 	}
 
 	public void setEventId(String EventId) {
-		this.EventId = EventId;
+		this.event_id = EventId;
 	}
 
 	public String getEventName() {
-		return EventName;
+		return event_name;
 	}
 
 	public void setEventName(String EventName) {
-		this.EventName = EventName;
+		this.event_name = EventName;
 	}
 
 	public String getEventDate() {
-		return EventDate;
+		return event_date;
 	}
 
 	public void setEventDate(String EventDate) {
-		this.EventDate = EventDate;
+		this.event_date = EventDate;
 	}
 
 	public String getEventLocation() {
-		return EventLocation;
+		return event_location;
 	}
 
 	public void setEventLocation(String EventLocation) {
-		this.EventLocation = EventLocation;
+		this.event_location = EventLocation;
 	}
 
 	public String getEventDescription() {
-		return EventDescription;
+		return event_description;
 	}
 
 	public void setEventDescription(String EventDescription) {
-		this.EventDescription = EventDescription;
+		this.event_description = EventDescription;
 	}
 
 	public String getOrganizerId() {
-		return OrganizerId;
+		return organizer_id;
 	}
 
 	public void setOrganizerId(String OrganizerId) {
-		this.OrganizerId = OrganizerId;
+		this.organizer_id = OrganizerId;
 	}
 	
-	public static void createEvent(String eventName, String date, String location, String description,
-			String organizerId) {
-		String query = "INSERT INTO events (EventName, EventDate, EventLocation, EventDescription, OrganizerId) VALUES(?, ?, ?, ?, ?)";
+	public static void createEvent(String eventName, String date, String location, String description, String organizerId) {
+		String query = "INSERT INTO event (event_name, event_date, event_location, event_description, organizer_id) "
+				+ "VALUES(?, ?, ?, ?, ?)";
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 			statement.setString(1, eventName);
 			statement.setString(2, date);
@@ -90,145 +96,104 @@ public class Event {
 			e.printStackTrace();
 		}
 	}
-
-	public static List<Event> getAllEvent() {
-		String query = "SELECT * FROM events";
-		List<Event> events = new ArrayList<>();
-
-		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-
-			try (ResultSet rs = statement.executeQuery()) {
-				while (rs.next()) {
-					Event event = new Event();
-					event.setEventId(rs.getString("EventId"));
-					event.setEventName(rs.getString("EventName"));
-					event.setEventDate(rs.getString("EventDate"));
-					event.setEventLocation(rs.getString("EventLocation"));
-					event.setEventDescription(rs.getString("EventDescription"));
-					event.setOrganizerId(rs.getString("OrganizerId"));
-
-					events.add(event);
-				}
-			}
-
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-
-		return events;
-	}
 	
-	public static List<Event> viewOrganizedEvents(String OrganizerId){
-    	String query = "SELECT * FROM events WHERE OrganizerId = ?";
-    	List<Event> organizedEvents = new ArrayList<>();
-    	
-    	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-    		statement.setString(1, OrganizerId);
- 	        try (ResultSet rs = statement.executeQuery()) {
- 	            while(rs.next()) {
- 	                Event event = new Event();
- 	                event.setEventDate(rs.getString("EventDate"));
- 	                event.setEventDescription(rs.getString("EventDescription"));
- 	                event.setEventId(rs.getString("EventId"));
- 	                event.setEventLocation(rs.getString("EventLocation"));
- 	                event.setEventName(rs.getString("EventName"));
- 	                event.setOrganizerId(OrganizerId);
- 	                organizedEvents.add(event);
- 	            }
- 	        }
- 	    } catch (SQLException e) {
- 	        e.printStackTrace();
- 	    }
-        return organizedEvents;
-    }
-
-	public static Event viewOrganizedEventDetails(String eventID) {
-		String query = "SELECT * FROM events WHERE EventId = ?";
+	public static Event viewEventDetails(String eventId) {
+		String query = "SELECT * FROM event WHERE event_id = ?";
 		Event event = null;
-
+		
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-			statement.setString(1, eventID);
+			statement.setString(1, eventId);
 
 			try (ResultSet rs = statement.executeQuery()) {
 				if (rs.next()) {
-					event = new Event();
-					event.setEventName(rs.getString("EventName"));
-					event.setEventDate(rs.getString("EventDate"));
-					event.setEventDescription(rs.getString("EventDescription"));
-					event.setEventId(rs.getString("EventId"));
-					event.setOrganizerId(rs.getString("OrganizerId"));
+					event = new Event(rs.getString("event_id"),
+									  rs.getString("event_name"),
+									  rs.getString("event_date"),
+									  rs.getString("event_location"),
+									  rs.getString("event_description"),
+									  rs.getString("organizer_id"));
 				}
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
 		}
-		return event;
-	}
-
-	public static void deleteEvent(String id) {
-		String query = "DELETE FROM events WHERE EventId = ?";
-		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-			statement.setString(1, id);
-
-			int rowsAffected = statement.executeUpdate();
-			if (rowsAffected > 0) {
-				System.out.println("Event deleted successfully!");
-			} else {
-				System.out.println("Failed to delete event.");
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-		}
-	}
-
-	
-
-	public static String editEventName(String eventId, String EventName) {
-		String query = "UPDATE events SET EventName = ? WHERE EventId = ?";
-		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-			statement.setString(1, EventName);
-			statement.setString(2, eventId);
-			int rowsAffected = statement.executeUpdate();
-			if (rowsAffected > 0) {
-				return "Event successfully updated";
-			} else {
-				return "Failed to update event";
-			}
-		} catch (SQLException e) {
-			e.printStackTrace();
-			return "An error occurred while updating the event";
-		}
+        return event;
 	}
 	
-	public static List<Event> viewAcceptedEvents(String email) {
-	    String query = "SELECT e.EventId, e.EventDate, e.EventName, e.EventLocation, "
-	                 + "e.EventDescription, e.OrganizerId "
-	                 + "FROM invitations i "
-	                 + "JOIN users u ON i.user_id = u.user_id "
-	                 + "JOIN events e ON i.EventId = e.EventId "
-	                 + "WHERE u.email = ? AND i.invitation_status = ?";
-
-	    List<Event> events = new ArrayList<>();
-
-	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-	        statement.setString(1, email); 
-	        statement.setString(2, "accepted"); 
-	        try (ResultSet rs = statement.executeQuery()) {
-	            while (rs.next()) {
-	                Event event = new Event();
-	                event.setEventId(rs.getString("EventId"));
-	                event.setEventDate(rs.getString("EventDate"));
-	                event.setEventName(rs.getString("EventName"));
-	                event.setEventLocation(rs.getString("EventLocation"));
-	                event.setEventDescription(rs.getString("EventDescription"));
-	                event.setOrganizerId(rs.getString("OrganizerId"));
-	                events.add(event);
-	            }
-	        }
-	    } catch (SQLException e) {
-	        e.printStackTrace();
-	    }
-	    return events;
-	}
+//	public static List<Event> viewOrganizedEvent(String OrganizerId){
+//    	String query = "SELECT * FROM event WHERE organizer_id = ?";
+//    	List<Event> organizedevent = new ArrayList<>();
+//    	
+//    	try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+//    		statement.setString(1, OrganizerId);
+// 	        try (ResultSet rs = statement.executeQuery()) {
+// 	            while(rs.next()) {
+// 	            	Event event = new Event(rs.getString("event_id"),
+//			  			    				rs.getString("event_name"),
+//			  			    				rs.getString("event_date"),
+//			  			    				rs.getString("event_location"),
+//			  			    				rs.getString("event_description"),
+//			  			    				rs.getString("organizer_id"));
+// 	                organizedevent.add(event);
+// 	            }
+// 	        }
+// 	    } catch (SQLException e) {
+// 	        e.printStackTrace();
+// 	    }
+//        return organizedevent;
+//    }
+//
+//	public static Event viewOrganizedEventDetails(String eventId) {
+//		String query = "SELECT * FROM event WHERE event_id = ?";
+//		Event event = null;
+//
+//		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+//			statement.setString(1, eventId);
+//
+//			try (ResultSet rs = statement.executeQuery()) {
+//				if (rs.next()) {
+//					event = new Event(rs.getString("event_id"),
+//			  			    		  rs.getString("event_name"),
+//			  			    		  rs.getString("event_date"),
+//			  			    		  rs.getString("event_location"),
+//			  			    		  rs.getString("event_description"),
+//			  			    		  rs.getString("organizer_id"));
+//				}
+//			}
+//		} catch (SQLException e) {
+//			e.printStackTrace();
+//		}
+//		return event;
+//	}
+	
+//	public static List<Event> viewAcceptedEvent(String email) {
+//	    String query = "SELECT e.event_id, e.event_date, e.event_name, "
+//	    			 + "e.event_location, e.event_description, e.organizer_id "
+//	                 + "FROM invitations i "
+//	                 + "JOIN users u ON i.user_id = u.user_id "
+//	                 + "JOIN event e ON i.event_id = e.event_id "
+//	                 + "WHERE u.email = ? AND i.invitation_status = ?";
+//
+//	    List<Event> events = new ArrayList<>();
+//
+//	    try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
+//	        statement.setString(1, email); 
+//	        statement.setString(2, "accepted"); 
+//	        try (ResultSet rs = statement.executeQuery()) {
+//	            while (rs.next()) {
+//	            	Event event = new Event(rs.getString("event_id"),
+//	            							rs.getString("event_name"),
+//	            							rs.getString("event_date"),
+//	            							rs.getString("event_location"),
+//	            							rs.getString("event_description"),
+//	            							rs.getString("organizer_id"));
+//	                events.add(event);
+//	            }
+//	        }
+//	    } catch (SQLException e) {
+//	        e.printStackTrace();
+//	    }
+//	    return events;
+//	}
 	
 }

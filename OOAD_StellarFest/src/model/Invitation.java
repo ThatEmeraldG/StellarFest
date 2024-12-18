@@ -17,12 +17,22 @@ public class Invitation {
 	
 	private static SQLConnect dbConnect = SQLConnect.getInstance(); 
 	
-	public Invitation() {
+	// Constructor
+	public Invitation(String invitation_id, String event_id, String user_id, String invitation_status,
+			String invitation_role) {
 		super();
+		this.invitation_id = invitation_id;
+		this.event_id = event_id;
+		this.user_id = user_id;
+		this.invitation_status = invitation_status;
+		this.invitation_role = invitation_role;
 	}
+	
+	// Getters and Setters
 	public String getInvitationId() {
 		return invitation_id;
 	}
+	
 	public void setInvitationId(String invitation_id) {
 		this.invitation_id = invitation_id;
 	}
@@ -51,11 +61,9 @@ public class Invitation {
 		this.invitation_role = invitation_role;
 	}
 	
-	public static String generateId() {
-		String prefix = "IN";
+	public String generateId() {
 		int nextNum = 1;
-
-		String query = "SELECT COUNT(*) AS invitation_count FROM invitations";
+		String query = "SELECT COUNT(*) AS invitation_count FROM invitation";
 
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 			ResultSet rs = statement.executeQuery();
@@ -66,76 +74,81 @@ public class Invitation {
 			e.printStackTrace();
 		}
 
-		return String.format("%s%03d", prefix, nextNum);
+		return String.format("INV%03d", nextNum);
 	}
 
-	public static String sendInvitation(String email, String eventID) {
+	public String sendInvitation(String email, String eventID) {
 
-		String query = "INSERT INTO invitations (invitation_id, event_id, user_id, invitation_role, invitation_status) VALUES (?, ?, ?, ?, ?)";
+		String query = "INSERT INTO invitation (invitation_id, event_id, user_id, "
+					 + "invitation_role, invitation_status) "
+					 + "VALUES (?, ?, ?, ?, ?)";
 
-		User u = User.getUserByEmail(email);
+		User user = new User();
+		user.getUserByEmail(email);
 
-		String invitation_id = Invitation.generateId();
-		String user_id = u.getId();
-		String role = u.getRole();
+		String invitationId = generateId();
+		String userId = user.getId();
+		String role = user.getRole();
 		String status = "pending";
 
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-			statement.setString(1, invitation_id);
+			statement.setString(1, invitationId);
 			statement.setString(2, eventID);
-			statement.setString(3, user_id);
+			statement.setString(3, userId);
 			statement.setString(4, role);
 			statement.setString(5, status);
 
 			int rowsInserted = statement.executeUpdate();
 
 			if (rowsInserted > 0) {
-				return "Invitation sent successfully to " + email;
+				System.out.println("Invitation sent successfully to " + email);
+				return "success";
 			} else {
-				return "Failed to send invitation to " + email;
+				System.out.println("Failed to send invitation to " + email);
+				return "failed";
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return "Error occurred while sending invitation: " + e.getMessage();
+			System.out.println("Error occurred while sending invitation: " + e.getMessage());
+			return "failed";
 		}
-
 	}
 
-	public static String acceptInvitation(String eventId, String userId) {
-
-		String query = "UPDATE invitatons SET invitation_status = ? WHERE user_id = ? AND event_id = ?";
+	public String acceptInvitation(String eventId) {
+		String query = "UPDATE invitation SET invitation_status = ? "
+						+ "WHERE event_id = ? AND user_id = ?";
 
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
 			statement.setString(1, "accepted");
-			statement.setString(2, userId);
-			statement.setString(3, eventId);
+			statement.setString(2, eventId);
 			int rowsAffected = statement.executeUpdate();
 			if (rowsAffected > 0) {
-				return "Invitation accepted";
+				System.out.println("Invitation accepted");
+				return "success";
 			} else {
-				return "Invitation unable to be accepted";
+				System.out.println("Invitation unable to be accepted");
+				return "failed";
 			}
 		} catch (SQLException e) {
 			e.printStackTrace();
-			return "Error occured";
+			System.out.println("Error occured");
+			return "failed";
 		}
 	}
 
-	public static List<Invitation> getInvitations(String userId) throws SQLException {
-
-		String query = "SELECT * FROM invitations WHERE user_id = ?";
+	public List<Invitation> getInvitations(String email) throws SQLException {
+		String query = "SELECT * FROM invitation WHERE user_email = ?";
 		List<Invitation> invitations = new ArrayList<>();
 
 		try (PreparedStatement statement = dbConnect.preparedStatement(query)) {
-			statement.setString(1, userId);
+			statement.setString(1, email);
 			try (ResultSet rs = statement.executeQuery()) {
 				while (rs.next()) {
-					Invitation invitation = new Invitation();
-					invitation.setEventId(rs.getString("event_id"));
-					invitation.setInvitationId(rs.getString("invitation_id"));
-					invitation.setInvitationRole(rs.getString("invitation_role"));
-					invitation.setInvitationStatus(rs.getString("invitation_status"));
-					invitation.setUserId(rs.getString("user_id"));
+					Invitation invitation = new Invitation(rs.getString("invitation_id"),
+														   rs.getString("event_id"),
+														   rs.getString("user_id"),
+														   rs.getString("invitation_status"),
+														   rs.getString("invitation_role"));
 					invitations.add(invitation);
 				}
 			}

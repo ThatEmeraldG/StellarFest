@@ -1,91 +1,67 @@
 package controller;
 
-import java.util.List;
 import model.User;
 
 public class UserController {
+	private User user;
 	
-	public static void register(String username, String pass, String email, String role) {
-		User.register(username, pass, email, role);
+	public void register(String email, String name, String password, String role) {
+		user.register(email, name, password, role);
 	}
 	
-	public void deleteUser(String id) {
-        User.deleteUser(id);
-    }
-    
-    public List<User> getAllUser() {
-    	return User.getAllUser();
-    }
-    
-    public String validateRegister(String name, String password, String email, String role) {
-    	if (name.isEmpty() || password.isEmpty() || email.isEmpty() || role.isEmpty() ) {
-    		return "All field must be filled!";
+	public User login(String email, String password) {
+		return user.login(email, password);
+	}
+	
+    public String validateRegister(String username, String email, String password, String role) {
+    	if (username.isEmpty() || password.isEmpty() || email.isEmpty() || role.isEmpty() ) {
+    		return "All fields must be filled!";
     	}
-    	
     	if (password.length() < 5) {
     		return "Password length must be at least 5 letters!";
     	}
-    	
     	if (getUserByEmail(email) != null) {
-    		return "Email must be unique!";
+    		return "Email already registered!";
     	}
-    	
-    	if (getUserByName(name) != null) {
+    	if (getUserByName(username) != null) {
     		return "Username must be unique!";
     	}
-    	
-    	return "";
+    	return "failed";
     }
 
-    public boolean validateLogin(String name, String password) {
-    	if (name.isEmpty() || password.isEmpty()) {
-    		return false;
+    public String validateLogin(String username, String password) {
+    	if (username.isEmpty() || password.isEmpty()) {
+    		return "All fields must be filled!";
     	}
-    	
-    	return true;
+    	return "failed";
     }
-
 	
-	public User login(String name, String password) {
-		return User.login(name, password);
+	public String updateProfile(String username, String email, String oldPassword, String newPassword) {
+	    return user.updateProfile(username, email, oldPassword, newPassword);
 	}
 	
-	public String updateProfile(String email, String name, String oldPassword, String newPassword) {
-	    return User.updateProfile(email, name, oldPassword, newPassword);
+	public User getUserByName(String username) {
+	    return user.getUserByName(username);
 	}
 
-	
-	public User getUserByName(String name) {
-	    return User.getUserByName(name);
-	}
-
-	
 	public User getUserByEmail(String email) {
-		return User.getUserByEmail(email);
+		return user.getUserByEmail(email);
 	}
 	
 	public boolean checkRegisterInput(String email, String name, String password) {
-		if(email == "" || name == "" || password == "") {
-			return false;
-		} else if(getUserByName(name)!= null) {
-			return false;
-		} else if(getUserByEmail(email)!= null) {
-			return false;
-		} else if(password.length() < 5) {
-			return false;
-		}
-			
-		return true;
+		return user.checkRegisterInput(email, name, password);
 	}
 	
-	public boolean checkChangeProfile(String email, String name, String oldPassword, String newPassword) {
-		if(email == "" || name == "" || newPassword == "") {
+	public boolean checkChangeProfile(String username, String email, String oldPassword, String newPassword) {
+		if(email.isEmpty() || username.isEmpty() || newPassword.isEmpty()) {
 			return false;
-		} else if(getUserByName(name)!= null) {
+		} else if(getUserByName(username) != null) {
 			return false;
-		} else if(getUserByEmail(email)!= null) {
+		} else if(getUserByEmail(email) != null) {
 			return false;
 		} else if(newPassword.length() < 5) {
+			return false;
+		} else if(newPassword.equals(oldPassword)){
 			return false;
 		}
 		return true;

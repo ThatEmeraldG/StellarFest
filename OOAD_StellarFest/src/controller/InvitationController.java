@@ -6,23 +6,17 @@ import java.util.List;
 import model.Invitation;
 
 public class InvitationController {
-	private String userId;
+	private Invitation invitation;
 	
-    public InvitationController(String userId) {
-    	this.userId = userId;
-    }
-	
-	public String sendInvitation(String email, String eventID) {
-		
-		return Invitation.sendInvitation(email, eventID);
-		
+	public String sendInvitation(String email, String eventId) {
+		return invitation.sendInvitation(email, eventId);
 	}
 	
 	public String acceptInvitation(String eventId) {
-		return Invitation.acceptInvitation(eventId, eventId);
+		return invitation.acceptInvitation(eventId);
 	}
 	
 	public List<Invitation> getInvitations(String email) throws SQLException{
-		return Invitation.getInvitations(userId);
+		return invitation.getInvitations(email);
    }
 }

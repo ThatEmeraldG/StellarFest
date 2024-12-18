@@ -1,13 +1,6 @@
 package view;
 
-import java.sql.PreparedStatement;
-import java.sql.SQLException;
-import java.util.ArrayList;
-import java.util.Random;
-
 import controller.UserController;
-import javafx.collections.FXCollections;
-import javafx.collections.ObservableList;
 import javafx.geometry.Insets;
 import javafx.geometry.Pos;
 import javafx.scene.Scene;
@@ -15,18 +8,9 @@ import javafx.scene.control.Button;
 import javafx.scene.control.ComboBox;
 import javafx.scene.control.Label;
 import javafx.scene.control.PasswordField;
-import javafx.scene.control.SelectionMode;
-import javafx.scene.control.TableColumn;
-import javafx.scene.control.TableSelectionModel;
-import javafx.scene.control.TableView;
 import javafx.scene.control.TextField;
-import javafx.scene.control.cell.PropertyValueFactory;
-import javafx.scene.layout.BorderPane;
 import javafx.scene.layout.GridPane;
-import javafx.scene.layout.HBox;
 import javafx.scene.layout.VBox;
-import model.User;
-import utils.SQLConnect;
 
 public class Register {
 	private VBox root, formVbox; 
@@ -38,7 +22,6 @@ public class Register {
 	private PasswordField passField;
 	private Button submitButton; 
 	private Label registerLabel;
-	private ArrayList<User> userList = new ArrayList<>(); 
 	
 	public Register() {
 		init(); 
@@ -88,14 +71,15 @@ public class Register {
 	}
 	
 	public void setEventHandler() {
+		UserController userCon = new UserController();
 //		insert data 
 		submitButton.setOnAction(e -> {
 			String username = nameField.getText(); 
-			String email = nameField.getText(); 
+			String email = emailField.getText(); 
 			String pass = passField.getText(); 
 			String role = roleField.getValue();
 			
-			UserController.register(username, email, pass, role);
+			userCon.register(username, email, pass, role);
 		});
 	}
 	
