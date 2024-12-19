@@ -16,12 +16,10 @@ public class ChangeProfile {
     private VBox root, formVbox;
     private Scene loginScene;
     private GridPane formGp;
-    private Label emailLabel,nameLabel, passLabel, oldPassLabel;
+    private Label emailLabel,nameLabel, passLabel, oldPassLabel, changeProfileLabel, homeLabel;
     private TextField emailField, nameField;
     private PasswordField newPassField, oldPassField;
     private Button submitButton;
-    private Label loginLabel;
-    private Label homeLabel;
 
     public ChangeProfile() {
         init();
@@ -34,7 +32,7 @@ public class ChangeProfile {
         this.root = new VBox();
         this.loginScene = new Scene(root, 800, 600);
         this.formGp = new GridPane();
-        this.loginLabel = new Label("Change Profile");
+        this.changeProfileLabel = new Label("Change Profile");
         this.emailLabel = new Label("Email");
         this.nameLabel = new Label("Username");
         this.passLabel = new Label("New Password");
@@ -57,7 +55,7 @@ public class ChangeProfile {
         formGp.add(newPassField, 1, 2);
         formGp.add(oldPassLabel, 0, 3);
         formGp.add(oldPassField, 1, 3);
-        formVbox.getChildren().addAll(loginLabel, formGp, submitButton, homeLabel);
+        formVbox.getChildren().addAll(changeProfileLabel, formGp, submitButton, homeLabel);
         root.getChildren().addAll(formVbox);
     }
 
@@ -78,9 +76,9 @@ public class ChangeProfile {
         submitButton.setOnAction(e -> {
             String email = emailField.getText();
             String username = nameField.getText();
-            String password = newPassField.getText();
+            String newPassword = newPassField.getText();
             String oldPassword = oldPassField.getText();
-            userCon.updateProfile(username, email, oldPassword, password);
+            userCon.updateProfile(username, email, oldPassword, newPassword);
         });
 
         homeLabel.setOnMouseClicked(e -> {
