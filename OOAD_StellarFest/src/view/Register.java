@@ -11,12 +11,13 @@ import javafx.scene.control.PasswordField;
 import javafx.scene.control.TextField;
 import javafx.scene.layout.GridPane;
 import javafx.scene.layout.VBox;
+import javafx.stage.Stage;
 
 public class Register {
 	private VBox root, formVbox; 
 	private Scene registerScene; 
 	private GridPane formGp; 
-	private Label nameLabel, emailLabel, passLabel, roleLabel; 
+	private Label nameLabel, emailLabel, passLabel, roleLabel, loginLabel; 
 	private TextField nameField, emailField;
 	private ComboBox<String> roleField;
 	private PasswordField passField;
@@ -32,7 +33,7 @@ public class Register {
 	
 	public void init() {
 		this.root = new VBox(); 
-		this.registerScene = new Scene(root, 1600, 900);
+		this.registerScene = new Scene(root, 800, 600);
 		this.formGp = new GridPane();
 		this.registerLabel = new Label("Register");
 		this.nameLabel = new Label("Username"); 
@@ -43,6 +44,9 @@ public class Register {
 		this.emailField = new TextField();
 		this.passField = new PasswordField();
 		this.roleField = new ComboBox<>();
+		this.roleField.getItems().addAll("Event Organizer", "Vendor", "Guest");
+		this.roleField.setValue("Select an option");
+		this.loginLabel = new Label("Already have an account? Login here!");
 		this.submitButton = new Button("Submit"); 
 		this.formVbox = new VBox();
 	}
@@ -56,7 +60,7 @@ public class Register {
 		formGp.add(passField, 1, 2);
 		formGp.add(roleLabel,  0, 3);
 		formGp.add(roleField, 1, 3);
-		formVbox.getChildren().addAll(registerLabel, formGp, submitButton); 
+		formVbox.getChildren().addAll(registerLabel, formGp, submitButton, loginLabel); 
 		root.getChildren().addAll(formVbox); 
 	}
 	
@@ -68,6 +72,7 @@ public class Register {
 		formGp.setVgap(10);
 		formVbox.setSpacing(20);
 		formVbox.setPadding(new Insets(20));
+		loginLabel.setStyle("-fx-text-fill: blue; -fx-cursor: hand;");
 	}
 	
 	public void setEventHandler() {
@@ -81,6 +86,12 @@ public class Register {
 			
 			userCon.register(username, email, pass, role);
 		});
+		
+		loginLabel.setOnMouseClicked(e -> {
+        	Login loginView = new Login();
+            Stage stage = (Stage) root.getScene().getWindow();
+            stage.setScene(loginView.getScene());
+        });
 	}
 	
 	public Scene getScene() {
